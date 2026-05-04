@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #0f1117;
+  color: #f0f0f0;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar          { width: 4px; height: 4px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { background: #32363f; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #44485280; }
+
+/* ── Konva cursor overrides ── */
+.cursor-none canvas      { cursor: none !important; }
+.cursor-crosshair canvas { cursor: crosshair !important; }
+.cursor-default canvas   { cursor: default !important; }
+.cursor-cell canvas      { cursor: cell !important; }
+
+/* ── Toast animation ── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ── Smooth select ── */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px !important;
+}
+
+/* ── @media print ── */
+@media print {
+  body {
+    overflow: auto;
+    height: auto;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  #root {
+    height: auto;
+    overflow: visible;
+  }
+
+  header,
+  footer,
+  nav,
+  [data-no-print],
+  .border-b.border-border.shrink-0,
+  .border-t.border-border.bg-panel,
+  .shrink-0.border-r.border-border,
+  .shrink-0.border-l.border-border {
+    display: none !important;
+  }
+
+  .flex-1.min-w-0.relative {
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+
+  canvas {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+}
+
+/* ── Responsive helpers ── */
+@media (max-width: 1024px) {
+  /* Panels become fixed drawers on tablet/mobile — handled via Tailwind + JS */
+}
