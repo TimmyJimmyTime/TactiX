@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
-import { Stage, Layer, Rect, Circle } from 'react-konva'
+import { Stage, Layer, Rect, Circle, Shape } from 'react-konva'
 import { v4 as uuid } from 'uuid'
 import useStore from '../../store'
 import { getFieldRect, screenToField, isInField, clampNorm } from '../../utils/fieldGeometry'
@@ -78,6 +78,9 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
   const [highlightedSlotId, setHighlightedSlotId] = useState(null)
   const [slotPopover, setSlotPopover] = useState(null)  // { slot, screenX, screenY }
   const [laserPos, setLaserPos]     = useState(null)    // { x, y } stage coords
+  const [laserTrail, setLaserTrail] = useState([])     // [{x,y,t}] decaying trail
+  const laserRafRef                 = useRef(null)
+  const LASER_DECAY_MS              = 900
 
   const boards              = useStore((s) => s.boards)
   const players             = useStore((s) => s.players)
@@ -118,6 +121,23 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     ro.observe(containerRef.current)
     return () => ro.disconnect()
   }, [])
+
+  // Laser trail decay loop — runs only while laser tool is active
+  useEffect(() => {
+    const isLaser = presentMode && activeTool === 'laser'
+    if (!isLaser) {
+      setLaserTrail([])
+      cancelAnimationFrame(laserRafRef.current)
+      return
+    }
+    const tick = () => {
+      const now = Date.now()
+      setLaserTrail((prev) => prev.filter((p) => now - p.t < LASER_DECAY_MS))
+      laserRafRef.current = requestAnimationFrame(tick)
+    }
+    laserRafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(laserRafRef.current)
+  }, [presentMode, activeTool, LASER_DECAY_MS])
 
   const fieldRect = size.width > 0
     ? getFieldRect(size.width, size.height, format)
@@ -233,9 +253,10 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     const stage = stageRef.current
     const pos   = stage?.getPointerPosition()
 
-    // Laser pointer
+    // Laser pointer — track position and build trail
     if (presentMode && activeTool === 'laser') {
       setLaserPos(pos || null)
+      if (pos) setLaserTrail((prev) => [...prev, { x: pos.x, y: pos.y, t: Date.now() }])
       return
     }
 
@@ -452,6 +473,14 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
             />
           </Layer>
 
+          {/* Telestration (zones, arrows, etc.) renders BEFORE PlayerLayer
+              so player tokens always appear on top of zones */}
+          <TelestrationLayer
+            fieldRect={fieldRect}
+            items={teleItems}
+            inProgress={inProgress}
+          />
+
           <PlayerLayer
             fieldRect={fieldRect}
             boardId={boardId}
@@ -466,27 +495,69 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
             onOpponentRightClick={handleOpponentRightClick}
           />
 
-          <TelestrationLayer
-            fieldRect={fieldRect}
-            items={teleItems}
-            inProgress={inProgress}
-          />
-
-          {/* Laser pointer layer */}
-          {presentMode && activeTool === 'laser' && laserPos && (
+          {/* Laser pointer layer — trail + glowing dot */}
+          {presentMode && activeTool === 'laser' && (
             <Layer listening={false}>
-              <Circle
-                x={laserPos.x} y={laserPos.y}
-                radius={10}
-                fill="rgba(255,30,30,0.85)"
-                shadowColor="rgba(255,0,0,0.9)"
-                shadowBlur={20}
-              />
-              <Circle
-                x={laserPos.x} y={laserPos.y}
-                radius={4}
-                fill="#ffffff"
-              />
+              {/* Decaying trail rendered as a single custom canvas shape */}
+              {laserTrail.length > 1 && (
+                <Shape
+                  sceneFunc={(ctx) => {
+                    const now = Date.now()
+                    for (let i = 1; i < laserTrail.length; i++) {
+                      const p0  = laserTrail[i - 1]
+                      const p1  = laserTrail[i]
+                      const age = (now - p1.t) / LASER_DECAY_MS
+                      const alpha = Math.max(0, 1 - age)
+                      if (alpha < 0.02) continue
+                      ctx.save()
+                      ctx.globalAlpha  = alpha * 0.72
+                      ctx.strokeStyle  = '#ff3333'
+                      ctx.lineWidth    = Math.max(1, 4 * alpha)
+                      ctx.lineCap      = 'round'
+                      ctx.shadowColor  = 'rgba(255,0,0,0.9)'
+                      ctx.shadowBlur   = 10 * alpha
+                      ctx.beginPath()
+                      ctx.moveTo(p0.x, p0.y)
+                      ctx.lineTo(p1.x, p1.y)
+                      ctx.stroke()
+                      ctx.restore()
+                    }
+                  }}
+                />
+              )}
+              {/* Glowing dot at current cursor position */}
+              {laserPos && (
+                <>
+                  {/* Outer halo */}
+                  <Circle
+                    x={laserPos.x} y={laserPos.y}
+                    radius={20}
+                    fillRadialGradientStartPoint={{ x: 0, y: 0 }}
+                    fillRadialGradientStartRadius={0}
+                    fillRadialGradientEndPoint={{ x: 0, y: 0 }}
+                    fillRadialGradientEndRadius={20}
+                    fillRadialGradientColorStops={[
+                      0,   'rgba(255,80,80,0.55)',
+                      0.45,'rgba(255,40,40,0.22)',
+                      1,   'rgba(255,0,0,0)',
+                    ]}
+                  />
+                  {/* Bright core */}
+                  <Circle
+                    x={laserPos.x} y={laserPos.y}
+                    radius={6}
+                    fill="#ff4444"
+                    shadowColor="rgba(255,0,0,1)"
+                    shadowBlur={14}
+                  />
+                  {/* White pinpoint */}
+                  <Circle
+                    x={laserPos.x} y={laserPos.y}
+                    radius={2.5}
+                    fill="#ffffff"
+                  />
+                </>
+              )}
             </Layer>
           )}
         </Stage>

@@ -189,6 +189,12 @@ export default function BoardEditor() {
       if (e.key === 'p') setActiveTool('straight_arrow')
       if (e.key === 't') setActiveTool('text')
       if (e.key === 'z' && !e.ctrlKey && !e.metaKey) setActiveTool('zone')
+      // Laser shortcut in present mode
+      if (presentMode && e.key === 'k') {
+        const next = !laserActive
+        setLaserActive(next)
+        setActiveTool(next ? 'laser' : 'select')
+      }
       // Presentation mode: arrow keys cycle phases
       if (presentMode) {
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -203,7 +209,7 @@ export default function BoardEditor() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [boardId, currentPhase, undoTele, redoTele, setActiveTool, setPlacingPlayerId, presentMode])
+  }, [boardId, currentPhase, undoTele, redoTele, setActiveTool, setPlacingPlayerId, presentMode, laserActive])
 
   // Animated phase transition
   const animatePhaseChange = useCallback((newPhase) => {
@@ -397,10 +403,14 @@ export default function BoardEditor() {
 
           {/* Laser tool */}
           <button
-            onClick={() => setLaserActive((v) => !v)}
-            title="Laser pointer"
+            onClick={() => {
+              const next = !laserActive
+              setLaserActive(next)
+              setActiveTool(next ? 'laser' : 'select')
+            }}
+            title="Laser pointer (K)"
             className={`text-sm px-2.5 py-1.5 rounded-xl transition-all
-              ${laserActive ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white hover:bg-panel-light'}`}
+              ${laserActive ? 'bg-red-600 text-white shadow-lg shadow-red-900/50' : 'text-gray-400 hover:text-white hover:bg-panel-light'}`}
           >
             ⊙
           </button>
