@@ -81,6 +81,7 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
   const [laserTrail, setLaserTrail] = useState([])     // [{x,y,t}] decaying trail
   const laserRafRef                 = useRef(null)
   const laserDownRef                = useRef(false)   // true only while mouse button held
+  const [laserHeld, setLaserHeld]   = useState(false) // mirrors laserDownRef for cursor class
   const LASER_DECAY_MS              = 900
 
   const boards              = useStore((s) => s.boards)
@@ -218,9 +219,10 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     setContextMenu(null)
     setSlotPopover(null)
 
-    // Laser pointer — activate on press
+    // Laser pointer — activate on press, cursor hides while drawing
     if (presentMode && activeTool === 'laser') {
       laserDownRef.current = true
+      setLaserHeld(true)
       return
     }
 
@@ -293,9 +295,10 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
 
   const handleMouseUp = useCallback(() => {
     eraserActive.current = false
-    // Release laser — hide dot, trail fades naturally via RAF loop
+    // Release laser — hide dot, restore cursor, trail fades naturally via RAF loop
     if (laserDownRef.current) {
       laserDownRef.current = false
+      setLaserHeld(false)
       setLaserPos(null)
     }
     if (!inProgress) return
@@ -314,6 +317,7 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
   const handleMouseLeave = useCallback(() => {
     if (presentMode && activeTool === 'laser') {
       laserDownRef.current = false
+      setLaserHeld(false)
       setLaserPos(null)
     }
   }, [presentMode, activeTool])
@@ -446,9 +450,9 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     showToast('Player placed ✓')
   }, [slotPopover, slots, boardId, phaseKey, setPhasePlayerSlots, showToast])
 
-  const cursorClass = activeTool === 'select'  ? 'cursor-default'
-    : activeTool === 'eraser'  ? 'cursor-cell'
-    : activeTool === 'laser'   ? 'cursor-none'
+  const cursorClass = activeTool === 'select'              ? 'cursor-default'
+    : activeTool === 'eraser'                              ? 'cursor-cell'
+    : (activeTool === 'laser' && laserHeld)                ? 'cursor-none'
     : 'cursor-crosshair'
 
   return (
