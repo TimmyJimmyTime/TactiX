@@ -262,10 +262,14 @@ export default function BoardEditor() {
     return () => clearInterval(interval)
   }, [autoPlay, presentMode, autoPlaySpeed, setCurrentPhase])
 
-  // Stop auto-play when exiting presentation mode
+  // Clean up when exiting presentation mode (any exit path)
   useEffect(() => {
-    if (!presentMode) setAutoPlay(false)
-  }, [presentMode])
+    if (!presentMode) {
+      setAutoPlay(false)
+      setLaserActive(false)
+      setActiveTool('select')
+    }
+  }, [presentMode, setActiveTool])
 
   // ── Export full playbook (all 4 phases) ───────────────────────────────────────
   const exportPlaybook = useCallback(async () => {
@@ -425,7 +429,7 @@ export default function BoardEditor() {
 
           <div className="w-px h-5 bg-border mx-0.5" />
 
-          <button onClick={() => setPresentMode(false)}
+          <button onClick={() => { setPresentMode(false); setLaserActive(false); setActiveTool('select') }}
             title="Exit presentation (Esc)"
             className="text-xs text-gray-400 hover:text-red-400 px-2 py-1 rounded-lg hover:bg-panel-light">
             ✕ Exit
