@@ -259,10 +259,10 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     const stage = stageRef.current
     const pos   = stage?.getPointerPosition()
 
-    // Laser pointer — only draw while mouse button is held
+    // Laser pointer — always track position for cursor ring; trail only when held
     if (presentMode && activeTool === 'laser') {
+      setLaserPos(pos || null)
       if (laserDownRef.current && pos) {
-        setLaserPos(pos)
         setLaserTrail((prev) => [...prev, { x: pos.x, y: pos.y, t: Date.now() }])
       }
       return
@@ -295,11 +295,11 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
 
   const handleMouseUp = useCallback(() => {
     eraserActive.current = false
-    // Release laser — hide dot, restore cursor, trail fades naturally via RAF loop
+    // Release laser — keep laserPos so ring stays visible; trail fades via RAF
     if (laserDownRef.current) {
       laserDownRef.current = false
       setLaserHeld(false)
-      setLaserPos(null)
+      // don't clear laserPos — ring stays at cursor position
     }
     if (!inProgress) return
 
@@ -450,9 +450,9 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     showToast('Player placed ✓')
   }, [slotPopover, slots, boardId, phaseKey, setPhasePlayerSlots, showToast])
 
-  const cursorClass = activeTool === 'select'              ? 'cursor-default'
-    : activeTool === 'eraser'                              ? 'cursor-cell'
-    : (activeTool === 'laser' && laserHeld)                ? 'cursor-none'
+  const cursorClass = activeTool === 'select'  ? 'cursor-default'
+    : activeTool === 'eraser'                  ? 'cursor-cell'
+    : activeTool === 'laser'                   ? 'cursor-none'  // always hidden — we draw our own ring
     : 'cursor-crosshair'
 
   return (
@@ -513,9 +513,30 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
             onOpponentRightClick={handleOpponentRightClick}
           />
 
-          {/* Laser pointer layer — trail + glowing dot */}
+          {/* Laser pointer layer — resting ring + trail + glowing dot */}
           {presentMode && activeTool === 'laser' && (
             <Layer listening={false}>
+
+              {/* Resting cursor ring — visible whenever laser tool is active */}
+              {laserPos && !laserHeld && (
+                <>
+                  <Circle
+                    x={laserPos.x} y={laserPos.y}
+                    radius={10}
+                    stroke="rgba(255,90,90,0.85)"
+                    strokeWidth={1.5}
+                    shadowColor="rgba(255,0,0,0.5)"
+                    shadowBlur={6}
+                    fill="transparent"
+                  />
+                  <Circle
+                    x={laserPos.x} y={laserPos.y}
+                    radius={2.5}
+                    fill="rgba(255,110,110,0.9)"
+                  />
+                </>
+              )}
+
               {/* Decaying trail rendered as a single custom canvas shape */}
               {laserTrail.length > 1 && (
                 <Shape
