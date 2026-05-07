@@ -80,6 +80,7 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
   const [laserPos, setLaserPos]     = useState(null)    // { x, y } stage coords
   const [laserTrail, setLaserTrail] = useState([])     // [{x,y,t}] decaying trail
   const laserRafRef                 = useRef(null)
+  const laserDownRef                = useRef(false)   // true only while mouse button held
   const LASER_DECAY_MS              = 900
 
   const boards              = useStore((s) => s.boards)
@@ -217,8 +218,11 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     setContextMenu(null)
     setSlotPopover(null)
 
-    // Laser pointer in presentation mode
-    if (presentMode && activeTool === 'laser') return
+    // Laser pointer — activate on press
+    if (presentMode && activeTool === 'laser') {
+      laserDownRef.current = true
+      return
+    }
 
     if (activeTool === 'eraser') {
       eraserActive.current = true
@@ -253,10 +257,12 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     const stage = stageRef.current
     const pos   = stage?.getPointerPosition()
 
-    // Laser pointer — track position and build trail
+    // Laser pointer — only draw while mouse button is held
     if (presentMode && activeTool === 'laser') {
-      setLaserPos(pos || null)
-      if (pos) setLaserTrail((prev) => [...prev, { x: pos.x, y: pos.y, t: Date.now() }])
+      if (laserDownRef.current && pos) {
+        setLaserPos(pos)
+        setLaserTrail((prev) => [...prev, { x: pos.x, y: pos.y, t: Date.now() }])
+      }
       return
     }
 
@@ -287,6 +293,11 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
 
   const handleMouseUp = useCallback(() => {
     eraserActive.current = false
+    // Release laser — hide dot, trail fades naturally via RAF loop
+    if (laserDownRef.current) {
+      laserDownRef.current = false
+      setLaserPos(null)
+    }
     if (!inProgress) return
 
     let finalPoints = inProgress.points
@@ -301,7 +312,10 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
 
   // Clear laser when mouse leaves stage
   const handleMouseLeave = useCallback(() => {
-    if (presentMode && activeTool === 'laser') setLaserPos(null)
+    if (presentMode && activeTool === 'laser') {
+      laserDownRef.current = false
+      setLaserPos(null)
+    }
   }, [presentMode, activeTool])
 
   // ── Stage click (placing player on open field) ────────────────────────────────
