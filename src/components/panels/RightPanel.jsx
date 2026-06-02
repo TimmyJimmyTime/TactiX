@@ -197,7 +197,10 @@ export default function RightPanel({ boardId, phaseKey }) {
   const navigate   = useNavigate()
   const boards     = useStore((s) => s.boards)
   const players    = useStore((s) => s.players)
-  const getPhase   = useStore((s) => s.getPhaseState)
+  // Subscribe directly to the playerSlots array so Zustand re-renders when
+  // any slot's playerId changes (e.g. unassignPlayer from the canvas).
+  // Using getPhaseState (a stable fn ref) was causing the panel to miss updates.
+  const slots      = useStore((s) => s.boardPhases?.[boardId]?.[phaseKey]?.playerSlots || [])
   const placingId  = useStore((s) => s.placingPlayerId)
   const setPlacing = useStore((s) => s.setPlacingPlayerId)
   const setPhaseSlots = useStore((s) => s.setPhasePlayerSlots)
@@ -209,8 +212,6 @@ export default function RightPanel({ boardId, phaseKey }) {
 
   const teamId     = board.teamId
   const roster     = (players[teamId] || []).filter((p) => p.isActive !== false)
-  const phaseState = getPhase(boardId, phaseKey)
-  const slots      = phaseState.playerSlots || []
   const onFieldIds = new Set(slots.map((s) => s.playerId).filter(Boolean))
 
   const filtered   = roster.filter((p) =>
