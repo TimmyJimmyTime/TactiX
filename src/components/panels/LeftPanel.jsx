@@ -5,7 +5,7 @@ import FormationBuilderModal from '../modals/FormationBuilderModal'
 import ConfirmModal from '../modals/ConfirmModal'
 
 const PHASES = [
-  { key: 'attack',    label: 'Attack',      icon: '⚔️',  color: '#22c55e' },
+  { key: 'attack',    label: 'Attack',      icon: '⚔️',  color: '#88C66F' },
   { key: 'defense',   label: 'Defense',     icon: '🛡️',  color: '#3b82f6' },
   { key: 'off_trans', label: 'Off. Trans.', icon: '⚡',  color: '#f59e0b' },
   { key: 'def_trans', label: 'Def. Trans.', icon: '↩️',  color: '#ef4444' },
@@ -21,7 +21,7 @@ const TOOLS = [
   { id: 'eraser',        icon: '⌫', tip: 'Eraser — click or drag to erase (E)' },
 ]
 
-const COLORS  = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#a855f7','#ffffff','#000000']
+const COLORS  = ['#ef4444','#f97316','#eab308','#88C66F','#3b82f6','#a855f7','#ffffff','#000000']
 const WEIGHTS  = ['thin','medium','thick']
 const THEMES   = ['classic','dark','whiteboard']
 
@@ -29,7 +29,7 @@ const THEMES   = ['classic','dark','whiteboard']
 function Section({ title, children, className = '' }) {
   return (
     <div className={`mb-4 ${className}`}>
-      <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600 mb-2.5 px-0.5">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] mb-2.5 px-0.5" style={{ color: '#8A958D', fontFamily: '"JetBrains Mono", monospace' }}>
         {title}
       </div>
       {children}
@@ -111,9 +111,11 @@ export default function LeftPanel({ boardId, phaseKey, onPhaseChange, onClearTel
               title={`Switch to ${p.label} phase`}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150
                 ${phaseKey === p.key
-                  ? 'text-black font-semibold shadow-md'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-panel-light'}`}
-              style={phaseKey === p.key ? { backgroundColor: p.color } : {}}
+                  ? 'font-semibold'
+                  : 'hover:bg-panel-light'}`}
+              style={phaseKey === p.key
+                ? { background: 'rgba(136,198,111,0.14)', color: '#88C66F' }
+                : { color: '#8A958D' }}
             >
               <span className="text-base leading-none">{p.icon}</span>
               <span className="flex-1 text-left text-[13px]">{p.label}</span>
@@ -199,8 +201,11 @@ export default function LeftPanel({ boardId, phaseKey, onPhaseChange, onClearTel
               onClick={() => setActiveTool(t.id)}
               className={`flex flex-col items-center justify-center py-2 rounded-lg text-base transition-all duration-100
                 ${activeTool === t.id
-                  ? 'bg-lime text-black shadow-md shadow-lime/20 font-bold'
-                  : 'bg-panel-light text-gray-400 hover:bg-border hover:text-gray-200'}`}
+                  ? 'font-bold'
+                  : 'bg-panel-light hover:bg-panel hover:text-gray-200'}`}
+              style={activeTool === t.id
+                ? { background: 'rgba(136,198,111,0.14)', color: '#88C66F', boxShadow: 'inset 0 0 0 1px rgba(136,198,111,0.28)' }
+                : { color: '#8A958D' }}
             >
               <span className="leading-none">{t.icon}</span>
             </button>
@@ -271,10 +276,10 @@ export default function LeftPanel({ boardId, phaseKey, onPhaseChange, onClearTel
                     key={w}
                     title={`${w} stroke`}
                     onClick={() => setToolOptions({ weight: w })}
-                    className={`flex-1 text-xs py-1.5 rounded-lg transition-colors
-                      ${toolOptions.weight === w
-                        ? 'bg-lime text-black font-bold'
-                        : 'bg-panel-light text-gray-400 hover:bg-border hover:text-white'}`}
+                    className={`flex-1 text-xs py-1.5 rounded-lg transition-colors font-medium`}
+                    style={toolOptions.weight === w
+                      ? { background: 'rgba(136,198,111,0.14)', color: '#88C66F' }
+                      : { background: 'rgba(33,48,41,1)', color: '#8A958D' }}
                   >
                     {w === 'thin' ? '—' : w === 'medium' ? '━' : '▬'}
                   </button>
@@ -289,10 +294,10 @@ export default function LeftPanel({ boardId, phaseKey, onPhaseChange, onClearTel
                   <button
                     key={s}
                     onClick={() => setToolOptions({ arrowStyle: s })}
-                    className={`flex-1 text-xs py-1.5 rounded-lg transition-colors
-                      ${toolOptions.arrowStyle === s
-                        ? 'bg-lime text-black font-bold'
-                        : 'bg-panel-light text-gray-400 hover:bg-border hover:text-white'}`}
+                    className={`flex-1 text-xs py-1.5 rounded-lg transition-colors font-medium`}
+                    style={toolOptions.arrowStyle === s
+                      ? { background: 'rgba(136,198,111,0.14)', color: '#88C66F' }
+                      : { background: 'rgba(33,48,41,1)', color: '#8A958D' }}
                   >
                     {s === 'solid' ? '───▶' : '- -▶'}
                   </button>
@@ -323,10 +328,10 @@ export default function LeftPanel({ boardId, phaseKey, onPhaseChange, onClearTel
                   <button
                     key={sz}
                     onClick={() => setToolOptions({ fontSize: sz })}
-                    className={`flex-1 text-xs py-1.5 rounded-lg transition-colors capitalize
-                      ${toolOptions.fontSize === sz
-                        ? 'bg-lime text-black font-bold'
-                        : 'bg-panel-light text-gray-400 hover:bg-border hover:text-white'}`}
+                    className={`flex-1 text-xs py-1.5 rounded-lg transition-colors capitalize font-medium`}
+                    style={toolOptions.fontSize === sz
+                      ? { background: 'rgba(136,198,111,0.14)', color: '#88C66F' }
+                      : { background: 'rgba(33,48,41,1)', color: '#8A958D' }}
                   >
                     {sz === 'small' ? 'S' : sz === 'medium' ? 'M' : 'L'}
                   </button>

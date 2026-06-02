@@ -9,7 +9,7 @@ import ConfirmModal from '../components/modals/ConfirmModal'
 import { exportPNG, exportPDF, exportFullPDF } from '../utils/exportUtils'
 
 const PHASES = [
-  { key: 'attack',    label: 'Attack',      icon: '⚔️',  color: '#22c55e' },
+  { key: 'attack',    label: 'Attack',      icon: '⚔️',  color: '#88C66F' },
   { key: 'defense',   label: 'Defense',     icon: '🛡️',  color: '#3b82f6' },
   { key: 'off_trans', label: 'Off. Trans.', icon: '⚡',  color: '#f59e0b' },
   { key: 'def_trans', label: 'Def. Trans.', icon: '↩️',  color: '#ef4444' },

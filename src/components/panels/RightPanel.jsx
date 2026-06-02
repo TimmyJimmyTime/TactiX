@@ -6,8 +6,8 @@ import useStore from '../../store'
 const POSITION_COLORS = {
   GK: '#f59e0b', CB: '#3b82f6', RB: '#3b82f6', LB: '#3b82f6',
   RWB: '#60a5fa', LWB: '#60a5fa', SW: '#3b82f6',
-  CDM: '#22c55e', CM: '#22c55e', CAM: '#22c55e',
-  RM: '#22c55e', LM: '#22c55e', DM: '#22c55e',
+  CDM: '#88C66F', CM: '#88C66F', CAM: '#88C66F',
+  RM: '#88C66F', LM: '#88C66F', DM: '#88C66F',
   RW: '#a855f7', LW: '#a855f7', SS: '#a855f7',
   ST: '#ef4444', CF: '#ef4444', FW: '#ef4444',
 }
@@ -59,7 +59,7 @@ function PlayerRow({ player, isOnField, isPlacing, onPlace, onRemove }) {
           <button
             onClick={onPlace}
             title="Click to place on field"
-            className="text-lime text-xs px-1.5 py-0.5 rounded hover:bg-lime/20 font-bold leading-none"
+            className="text-xs px-1.5 py-0.5 rounded font-bold leading-none" style={{ color: '#88C66F' }}
           >
             +
           </button>
@@ -77,7 +77,7 @@ function PlayerRow({ player, isOnField, isPlacing, onPlace, onRemove }) {
 
       {/* On-field indicator */}
       {isOnField && (
-        <div className="w-1.5 h-1.5 rounded-full bg-lime shrink-0" title="On field" />
+        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: '#88C66F', boxShadow: '0 0 0 3px rgba(136,198,111,0.16)' }} title="On field" />
       )}
     </div>
   )
@@ -254,10 +254,10 @@ export default function RightPanel({ boardId, phaseKey }) {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors
-              ${tab === t.id
-                ? 'text-white border-b-2 border-lime'
-                : 'text-gray-600 hover:text-gray-400'}`}
+            className={`flex-1 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors`}
+            style={tab === t.id
+              ? { color: '#88C66F', borderBottom: '2px solid #88C66F' }
+              : { color: '#5E6A63', borderBottom: '2px solid transparent' }}
           >
             {t.label}
           </button>
@@ -280,7 +280,9 @@ export default function RightPanel({ boardId, phaseKey }) {
               <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600">Roster</span>
               <button
                 onClick={() => navigate(`/teams/${teamId}`)}
-                className="text-[10px] text-gray-600 hover:text-lime transition-colors"
+                className="text-[10px] transition-colors" style={{ color: '#5E6A63' }}
+                onMouseEnter={e => e.currentTarget.style.color='#88C66F'}
+                onMouseLeave={e => e.currentTarget.style.color='#5E6A63'}
               >
                 Edit ↗
               </button>
@@ -315,7 +317,7 @@ export default function RightPanel({ boardId, phaseKey }) {
             {/* On field */}
             {onField.length > 0 && (
               <>
-                <div className="text-[10px] font-semibold text-lime uppercase tracking-[0.1em] px-1 mb-1">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.1em] px-1 mb-1" style={{ color: '#88C66F' }}>
                   On Field ({onField.length})
                 </div>
                 {onField.map((p) => (

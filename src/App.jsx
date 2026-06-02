@@ -9,7 +9,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <SuiteNav currentApp="TactiX" />
+        <SuiteNav currentApp="tacticx" />
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <Routes>
             <Route path="/"               element={<Dashboard />} />

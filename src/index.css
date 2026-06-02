@@ -1,16 +1,55 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── CoachHub Design Tokens ─────────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --ch-bg-0:    #0A100E;
+  --ch-bg-1:    #111B17;
+  --ch-bg-2:    #18241F;
+  --ch-bg-3:    #213029;
+  --ch-bg-4:    #2A3D34;
+  --ch-line:        rgba(220, 230, 220, 0.08);
+  --ch-line-strong: rgba(220, 230, 220, 0.16);
+  /* Ink */
+  --ch-ink-0:   #F2EFE5;
+  --ch-ink-1:   #C8CFC4;
+  --ch-ink-2:   #8A958D;
+  --ch-ink-3:   #5E6A63;
+  /* Brand */
+  --ch-brand:        #88C66F;
+  --ch-brand-soft:   rgba(136, 198, 111, 0.14);
+  --ch-brand-deep:   #5FA047;
+  --ch-brand-hover:  #9AD683;
+  --ch-data:    #E6C95A;
+  /* Status */
+  --ch-success: #88C66F;
+  --ch-warning: #E6B85D;
+  --ch-danger:  #E66B5D;
+  --ch-info:    #5BA5D9;
+  /* App accents */
+  --ch-app-tacticx:   #88C66F;
+  --ch-app-session:   #6FB8B0;
+  --ch-app-tactivize: #6FA8D9;
+  --ch-app-coachlog:  #D9C46F;
+  /* Radii */
+  --ch-r-xs: 4px; --ch-r-sm: 6px; --ch-r-md: 10px;
+  --ch-r-lg: 14px; --ch-r-xl: 20px; --ch-r-pill: 999px;
+  /* Motion */
+  --ch-ease: cubic-bezier(0.3, 0.7, 0.2, 1);
+  --ch-fast: 120ms; --ch-base: 180ms; --ch-slow: 280ms;
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: #0f1117;
-  color: #f0f0f0;
-  font-family: 'Inter', system-ui, sans-serif;
+  background: #0A100E;
+  color: #F2EFE5;
+  font-family: 'DM Sans', system-ui, sans-serif;
   overflow: hidden;
   height: 100vh;
   -webkit-font-smoothing: antialiased;

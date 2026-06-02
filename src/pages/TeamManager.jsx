@@ -165,7 +165,7 @@ export default function TeamManager() {
               <div>
                 <div className="text-xs text-gray-500 mb-1">Jersey Colour</div>
                 <div className="flex gap-2 flex-wrap">
-                  {['#e53e3e','#3b82f6','#22c55e','#f59e0b','#a855f7','#ec4899','#0ea5e9','#ffffff','#1a1a1a','#f97316'].map((c) => (
+                  {['#e53e3e','#3b82f6','#88C66F','#f59e0b','#a855f7','#ec4899','#0ea5e9','#ffffff','#1a1a1a','#f97316'].map((c) => (
                     <button key={c} onClick={() => setTeamForm((tf) => ({ ...tf, color: c }))}
                       className={`w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 ${teamForm.color === c ? 'border-white scale-110' : 'border-transparent'}`}
                       style={{ backgroundColor: c }} />

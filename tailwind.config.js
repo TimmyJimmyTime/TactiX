@@ -5,16 +5,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        // CoachHub suite palette
-        accent:  { DEFAULT: '#4ade80', dark: '#22c55e' },
-        panel:   { DEFAULT: '#1a1d27', light: '#1a1d27' },
-        surface: '#0f1117',
-        border:  '#2a2d3a',
-        text:    { primary: '#f0f0f0', secondary: '#8b8fa8' },
-        error:   '#f87171',
-        warning: '#fbbf24',
-        // keep lime alias pointing to accent so any remaining lime- classes still resolve
-        lime:    { DEFAULT: '#4ade80', dark: '#22c55e' },
+        // CoachHub design system palette
+        // Surfaces
+        'ch-bg-0':  '#0A100E',
+        'ch-bg-1':  '#111B17',
+        'ch-bg-2':  '#18241F',
+        'ch-bg-3':  '#213029',
+        'ch-bg-4':  '#2A3D34',
+        // Ink
+        'ch-ink-0': '#F2EFE5',
+        'ch-ink-1': '#C8CFC4',
+        'ch-ink-2': '#8A958D',
+        'ch-ink-3': '#5E6A63',
+        // Brand
+        'ch-brand': '#88C66F',
+        'ch-danger': '#E66B5D',
+        'ch-warning': '#E6B85D',
+        'ch-info': '#5BA5D9',
+        'ch-data': '#E6C95A',
+        // Legacy aliases — keep so existing Tailwind classes don't break
+        accent:  { DEFAULT: '#88C66F', dark: '#5FA047' },
+        panel:   { DEFAULT: '#18241F', light: '#213029' },
+        surface: '#0A100E',
+        border:  'rgba(220,230,220,0.08)',
+        text:    { primary: '#F2EFE5', secondary: '#8A958D' },
+        error:   '#E66B5D',
+        warning: '#E6B85D',
+        lime:    { DEFAULT: '#88C66F', dark: '#5FA047' },
+      },
+      fontFamily: {
+        display: ['"Archivo"', 'system-ui', 'sans-serif'],
+        ui:      ['"DM Sans"', 'system-ui', 'sans-serif'],
+        mono:    ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         '2xl': '1rem',
@@ -35,8 +57,8 @@ export default {
         },
       },
       boxShadow: {
-        'glow-lime':   '0 0 16px rgba(74,222,128,0.18)',
-        'glow-accent': '0 0 16px rgba(74,222,128,0.18)',
+        'glow-lime':   '0 0 16px rgba(136,198,111,0.22)',
+        'glow-accent': '0 0 16px rgba(136,198,111,0.22)',
         'glow-sm':     '0 2px 12px rgba(0,0,0,0.5)',
         'panel':       '0 4px 24px rgba(0,0,0,0.4)',
       },

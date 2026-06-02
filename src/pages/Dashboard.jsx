@@ -4,7 +4,7 @@ import useStore from '../store'
 import ConfirmModal from '../components/modals/ConfirmModal'
 
 const FORMAT_LABELS = { '11v11': '11v11', '9v9': '9v9', '7v7': '7v7' }
-const FORMAT_COLORS = { '11v11': '#22c55e', '9v9': '#3b82f6', '7v7': '#a855f7' }
+const FORMAT_COLORS = { '11v11': '#88C66F', '9v9': '#3b82f6', '7v7': '#a855f7' }
 
 function formatDate(ts) {
   if (!ts) return ''
@@ -34,7 +34,7 @@ function NewTeamModal({ onClose }) {
     navigate(`/teams/${id}`)
   }
 
-  const COLORS = ['#3b82f6','#ef4444','#22c55e','#f59e0b','#a855f7','#ec4899','#0ea5e9','#ffffff','#e53e3e','#f97316']
+  const COLORS = ['#3b82f6','#ef4444','#88C66F','#f59e0b','#a855f7','#ec4899','#0ea5e9','#ffffff','#e53e3e','#f97316']
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50" onClick={onClose}>
