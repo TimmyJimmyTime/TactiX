@@ -1,5 +1,5 @@
-# TactiX — Claude Handoff Document
-> Updated 2026-05-04 (Aesthetic overhaul + stale-closure drag fix). Pass to a new Claude instance to resume.
+# TactiX — Handoff Document
+> Last updated: 2026-06-12 — CoachHub v1.0 design system, SuiteNav, ErrorBoundary, react-konva fix.
 
 ---
 
@@ -19,7 +19,7 @@ All data persists to `localStorage` key `tactix-v1`. No backend. No `.env` neede
 
 ## Stack
 
-React 19 · Vite 8 · react-konva · Zustand 5 (persist) · React Router v7 · Tailwind v3 · jsPDF · uuid v4
+React 19 · Vite 8 · **react-konva 19.0.10** (see pinned version note) · Zustand 5 (persist) · React Router v7 · Tailwind v3 · jsPDF · uuid v14
 
 ---
 
@@ -49,6 +49,8 @@ src/
       FormationBuilderModal.jsx        # Custom formation builder with Konva stage
     ui/
       Toast.jsx                        # "Saved ✓" toast (auto-dismiss 2.4s)
+    SuiteNav.jsx                       # CoachHub 48px top nav + app switcher dropdown
+  ErrorBoundary.jsx                    # Root error boundary — shows readable crash screen
   pages/
     Dashboard.jsx                      # Teams, recent boards, duplicate board
     BoardEditor.jsx                    # Main editor, export, presentation mode
@@ -189,25 +191,50 @@ that never triggers re-renders. Without the direct subscription, every drag call
 
 ---
 
-## Aesthetic Design System
+## Design System
 
-Neutral-dark palette matching reference screenshots (PitchPlan / Coach Pro Suite style).
+**CoachHub v1.0** — dark pine surfaces, warm bone ink, per-app accents.
 
-### Tailwind Color Tokens
-```js
-lime:    { DEFAULT: '#AEEA00', dark: '#8BC400' }   // primary accent
-panel:   { DEFAULT: '#111418', light: '#1a1d25' }  // panel backgrounds
-surface: '#0b0d11'                                  // page / canvas background
-border:  '#22262f'                                  // all dividers / input borders
+### Core Tokens (index.css + tailwind.config.js)
 ```
-**No blue/purple tints anywhere.** These are neutral charcoals.
+Background (body):  #0A100E   --ch-bg-0
+Panel surface:      #18241F   --ch-bg-1   (Tailwind: bg-panel)
+Panel light:        #213029   --ch-bg-2   (Tailwind: bg-panel-light)
+Border:             rgba(220,230,220,0.08) (Tailwind: border-border)
+Primary ink:        #F2EFE5   --ch-ink-0
+Muted ink:          #8A958D   --ch-ink-2
+Brand green:        #88C66F   --ch-brand  (Tailwind: lime)
+Danger:             #E66B5D   --ch-danger
+TactiX accent:      #88C66F   (same as brand)
+```
+
+### Tailwind Aliases (tailwind.config.js)
+```js
+lime:    { DEFAULT: '#88C66F', dark: '#6EAB58' }
+panel:   { DEFAULT: '#18241F', light: '#213029' }
+surface: '#0A100E'
+border:  'rgba(220,230,220,0.08)'
+```
 
 ### Typography
-- Font: **Inter** (loaded via Google Fonts in `index.css`)
-- `-webkit-font-smoothing: antialiased` applied globally
-- Section labels: `text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-600`
-- Body text: `text-[13px]`
-- Konva text: `fontFamily="Inter, system-ui, sans-serif"`, `fontStyle="700"` for numbers
+- **Display/headings**: Archivo (Google Fonts)
+- **UI/body**: DM Sans (Google Fonts)
+- **Data/numbers**: JetBrains Mono (Google Fonts)
+- Konva text: `fontFamily="Inter, system-ui, sans-serif"` (canvas)
+- Section eyebrow labels: JetBrains Mono, `color: '#8A958D'`
+
+### SuiteNav
+48px pine bar (`#111B17`). Left: CoachHub brand mark + app pill. Right: grid app-switcher, bell, avatar.
+All 4 apps in the switcher: TactiX (`#88C66F`), Session Architect (`#6FB8B0`), Tactivize (`#6FA8D9`), CoachLog (`#D9C46F`).
+
+### Suite Apps
+- TactiX: https://tacticx.netlify.app
+- CoachLog: https://coachlog.netlify.app
+- Tactivize: https://tactivize.netlify.app
+
+### Deployment
+`netlify.toml` configured: `npm run build`, publish `dist`, SPA redirect `/* → /index.html` (status 200).
+GitHub: https://github.com/TimmyJimmyTime/TactiX
 
 ### Field Themes
 - `classic`: `#1e5c1e` (rich green)
@@ -220,16 +247,19 @@ border:  '#22262f'                                  // all dividers / input bord
 - Opponent: diamond (45° rotated rect), `fill='#1c0808'`, red stroke
 - Jersey number: Inter 700, luminance-based text contrast (black or white)
 
-### Box Shadows
-```js
-'glow-lime': '0 0 16px rgba(174,234,0,0.18)'
-'glow-sm':   '0 2px 12px rgba(0,0,0,0.5)'
-'panel':     '0 4px 24px rgba(0,0,0,0.4)'
-```
-
 ### Animations
 - `animate-fade-in`: 0.18s ease (tool option panels, phase notes)
 - `animate-toast-in`: spring bounce (toast notification)
+
+---
+
+## ⚠️ react-konva Version — DO NOT UPGRADE
+
+`react-konva` is pinned to **19.0.10** in `package.json`. Do not upgrade to 19.2.x.
+
+Versions 19.2.x introduced `flushSyncFromReconciler` / `flushSyncWork` inside a no-dependency `useLayoutEffect` in `StageWrap`. This causes a global flush of ALL React work (both Konva and DOM reconcilers) on every render. With Zustand v5's `useSyncExternalStore`, this created an infinite loop: Konva's `useLayoutEffect` → flush DOM work → Zustand re-renders FieldCanvas → Konva `useLayoutEffect` runs again → ... → React error #185 (Maximum update depth exceeded).
+
+Version 19.0.10 uses only `updateContainer` with no global flush. The two reconcilers run independently and this loop cannot occur. If you need to upgrade react-konva, verify that the `flushSync*` issue is resolved upstream before bumping.
 
 ---
 
@@ -244,6 +274,9 @@ border:  '#22262f'                                  // all dividers / input bord
 | Double-click on field-bg | onClick only on Stage, not Rect |
 | **Phase positions lost on switch** | **FieldCanvas/PlayerLayer now subscribe directly to `boardPhases[boardId][phaseKey]` — stale closure in drag callbacks eliminated** |
 | Dev server port mismatch | `vite.config.js` locks port to 5175 with `strictPort: true` |
+| **Netlify 404 on direct board URL** | **Added `[[redirects]] /* → /index.html` to `netlify.toml` — SPA needs all routes served from index.html** |
+| **Blank/black page on render crash** | **Added `ErrorBoundary.jsx` wrapping App — crashes now show readable error + back button instead of silent black screen** |
+| **React error #185 (infinite loop)** | **Downgraded react-konva to 19.0.10 — 19.2.x `flushSyncWork` in no-deps `useLayoutEffect` + Zustand v5 `useSyncExternalStore` = infinite render loop** |
 
 ---
 
