@@ -66,6 +66,10 @@ const KonvaStage = forwardRef(function KonvaStage(props, ref) {
     return () => {
       KonvaRenderer.updateContainer(null, fiberRef.current, null)
       stage.destroy()
+      // Null refs so the every-render effect's guard skips safely during
+      // React StrictMode's simulate-unmount/remount cycle
+      stageRef.current = null
+      fiberRef.current = null
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
