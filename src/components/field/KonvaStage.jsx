@@ -1,7 +1,10 @@
 import { useRef, useLayoutEffect, forwardRef, useImperativeHandle, createElement, Fragment } from 'react'
 import Konva from 'konva/lib/Core'
 import { KonvaRenderer } from 'react-konva'
-import { ConcurrentRoot } from 'react-reconciler/constants'
+
+// LegacyRoot (0) processes all reconciler work synchronously, with no
+// concurrent scheduler — eliminates the cross-root vl/_l flush loop (#185).
+const LEGACY_ROOT = 0
 
 // Maps React prop names → Konva event names
 const EVENT_MAP = {
@@ -48,7 +51,7 @@ const KonvaStage = forwardRef(function KonvaStage(props, ref) {
     stageRef.current = stage
 
     fiberRef.current = KonvaRenderer.createContainer(
-      stage, ConcurrentRoot, null, false, null, '',
+      stage, LEGACY_ROOT, null, false, null, '',
       console.error, console.error, console.error, null,
     )
 
