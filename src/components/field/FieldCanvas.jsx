@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useEffect, useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { Stage, Layer, Rect, Circle, Shape } from 'react-konva'
 import { v4 as uuid } from 'uuid'
 import useStore from '../../store'
@@ -141,9 +141,12 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
     return () => cancelAnimationFrame(laserRafRef.current)
   }, [presentMode, activeTool, LASER_DECAY_MS])
 
-  const fieldRect = size.width > 0
-    ? getFieldRect(size.width, size.height, format)
-    : { x: 0, y: 0, width: 0, height: 0 }
+  const fieldRect = useMemo(
+    () => size.width > 0
+      ? getFieldRect(size.width, size.height, format)
+      : { x: 0, y: 0, width: 0, height: 0 },
+    [size.width, size.height, format],
+  )
 
   // Team roster (for slot popover)
   const teamPlayers   = players[board?.teamId] || []
