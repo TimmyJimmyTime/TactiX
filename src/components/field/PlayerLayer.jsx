@@ -1,5 +1,4 @@
 import { Layer, Group, Circle, Rect, Text, Ring } from 'react-konva'
-import useStore from '../../store'
 
 // ── Colour helpers ─────────────────────────────────────────────────────────────
 function lightenHex(hex, amount = 0.25) {
@@ -18,7 +17,6 @@ function darkenHex(hex, amount = 0.3) {
   return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`
 }
 
-// Luminance-based text contrast (black or white)
 function textColorFor(hex) {
   const n = parseInt((hex || '#3b82f6').replace('#', ''), 16)
   const r = (n >> 16) & 0xff, g = (n >> 8) & 0xff, b = n & 0xff
@@ -39,9 +37,7 @@ function PlayerToken({
   const isGK      = slot.label === 'GK'
   const teamColor = team?.color || '#3b82f6'
 
-  // GK uses a slightly lighter shade; field players use full team color
   const fillColor = isGK ? lightenHex(teamColor, 0.15) : teamColor
-  // Darken for a subtle inner gradient feel (used as stroke on GK square)
   const darkFill  = darkenHex(fillColor, 0.18)
   const txtColor  = textColorFor(fillColor)
   const hasPlayer = !!player
@@ -51,7 +47,6 @@ function PlayerToken({
     : ''
   const numTxt = hasPlayer ? String(player.number ?? '') : ''
 
-  // Stroke: crisp white for dark fills, semi-transparent black for light fills
   const tokenStroke = txtColor === '#000000' ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.95)'
   const strokeW = 2.5
 
@@ -64,7 +59,6 @@ function PlayerToken({
       onTap={(e)   => { e.cancelBubble = true; onClick(slot) }}
       onContextMenu={(e) => { e.evt.preventDefault(); e.cancelBubble = true; onRightClick(slot, e) }}
     >
-      {/* Highlight glow ring — pulse lime */}
       {isHighlighted && (
         <Circle radius={r + 10} fill="rgba(174,234,0,0.14)" listening={false} />
       )}
@@ -72,7 +66,6 @@ function PlayerToken({
         <Ring innerRadius={r + 4} outerRadius={r + 7} fill="#AEEA00" opacity={0.9} listening={false} />
       )}
 
-      {/* Empty slot: dashed ghost circle */}
       {!hasPlayer && (
         <Circle
           radius={r}
@@ -84,10 +77,8 @@ function PlayerToken({
         />
       )}
 
-      {/* ── Token body ── */}
       {hasPlayer && (
         isGK ? (
-          /* GK: rounded square (distinctive shape) */
           <Rect
             x={-r} y={-r} width={r * 2} height={r * 2}
             cornerRadius={r * 0.35}
@@ -100,7 +91,6 @@ function PlayerToken({
             shadowOpacity={0.8}
           />
         ) : (
-          /* Outfield: circle */
           <Circle
             radius={r}
             fill={fillColor}
@@ -114,7 +104,6 @@ function PlayerToken({
         )
       )}
 
-      {/* Jersey number — large, centered, prominent */}
       {hasPlayer && numTxt !== '' && viewOptions.showNumbers !== false && (
         <Text
           text={numTxt}
@@ -128,7 +117,6 @@ function PlayerToken({
         />
       )}
 
-      {/* Position label on empty slot */}
       {!hasPlayer && slot.label && (
         <Text
           text={slot.label}
@@ -141,7 +129,6 @@ function PlayerToken({
         />
       )}
 
-      {/* Player name below token */}
       {hasPlayer && viewOptions.showNames && lastName && (
         <Text
           text={lastName}
@@ -158,7 +145,6 @@ function PlayerToken({
         />
       )}
 
-      {/* Position label above token */}
       {hasPlayer && viewOptions.showPositions && slot.label && (
         <Text
           text={slot.label}
@@ -176,7 +162,7 @@ function PlayerToken({
   )
 }
 
-// ── Opponent Token (diamond / rotated square) ──────────────────────────────────
+// ── Opponent Token ─────────────────────────────────────────────────────────────
 function OpponentToken({ slot, fieldRect, isDraggable, onDragEnd, onRightClick }) {
   const { x: fx, y: fy, width: fw, height: fh } = fieldRect
   const sx = fx + slot.x * fw
@@ -190,7 +176,6 @@ function OpponentToken({ slot, fieldRect, isDraggable, onDragEnd, onRightClick }
       onDragEnd={(e) => onDragEnd(slot.id, { x: e.target.x(), y: e.target.y() })}
       onContextMenu={(e) => { e.evt.preventDefault(); e.cancelBubble = true; onRightClick(slot, e) }}
     >
-      {/* Outer glow for contrast */}
       <Rect
         x={-r - 2} y={-r - 2}
         width={(r + 2) * 2} height={(r + 2) * 2}
@@ -198,7 +183,6 @@ function OpponentToken({ slot, fieldRect, isDraggable, onDragEnd, onRightClick }
         fill="rgba(239,68,68,0.1)"
         listening={false}
       />
-      {/* Diamond body */}
       <Rect
         x={-r} y={-r}
         width={r * 2} height={r * 2}
@@ -210,7 +194,6 @@ function OpponentToken({ slot, fieldRect, isDraggable, onDragEnd, onRightClick }
         shadowBlur={8}
         shadowOffsetY={2}
       />
-      {/* Number */}
       <Text
         text={String(slot.number || '')}
         x={-r} y={-r * 0.54}
@@ -226,31 +209,20 @@ function OpponentToken({ slot, fieldRect, isDraggable, onDragEnd, onRightClick }
 }
 
 // ── Exported Layer ─────────────────────────────────────────────────────────────
+// All data is passed as props from FieldCanvas — no Zustand subscriptions here.
+// Keeping Konva-reconciled components free of useSyncExternalStore prevents the
+// Konva reconciler flush from interacting with Zustand's snapshot checks, which
+// caused React error #185 on React 19.2.x.
 export default function PlayerLayer({
-  fieldRect, boardId, phaseKey, placingPlayerId,
-  highlightedSlotId, activeTool,
+  fieldRect, slots, opponents, teamPlayers, team, viewOptions,
+  placingPlayerId, highlightedSlotId, activeTool,
   onSlotClick, onSlotRightClick, onTokenDragEnd,
   onOpponentDragEnd, onOpponentRightClick,
 }) {
-  const players     = useStore((s) => s.players)
-  const teams       = useStore((s) => s.teams)
-  const boards      = useStore((s) => s.boards)
-  // Direct subscription — re-renders whenever THIS phase's slots change,
-  // so token positions always reflect the latest saved state.
-  const phaseData   = useStore((s) => s.boardPhases?.[boardId]?.[phaseKey])
-  const viewOptions = useStore((s) => s.viewOptions)
-
-  const board = boards.find((b) => b.id === boardId)
-  const team  = teams.find((t) => t.id === board?.teamId)
-  const teamPlayers = players[board?.teamId] || []
-  const slots    = phaseData?.playerSlots   || []
-  const opponents = phaseData?.opponentSlots || []
-
   const isDraggable = activeTool === 'select'
 
   return (
     <Layer>
-      {/* Player tokens */}
       {slots.map((slot) => {
         const player = teamPlayers.find((p) => p.id === slot.playerId) || null
         return (
@@ -273,7 +245,6 @@ export default function PlayerLayer({
         )
       })}
 
-      {/* Opponent tokens */}
       {opponents.map((opp) => (
         <OpponentToken
           key={opp.id}

@@ -85,6 +85,7 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
   const LASER_DECAY_MS              = 900
 
   const boards              = useStore((s) => s.boards)
+  const teams               = useStore((s) => s.teams)
   const players             = useStore((s) => s.players)
   const activeTool          = useStore((s) => s.activeTool)
   const toolOptions         = useStore((s) => s.toolOptions)
@@ -101,13 +102,14 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
   const removeTeleItem      = useStore((s) => s.removeTelestrationItem)
   const showToast           = useStore((s) => s.showToast)
 
-  const board  = boards.find((b) => b.id === boardId)
-  const format = board?.format || '11v11'
+  const board       = boards.find((b) => b.id === boardId)
+  const team        = teams.find((t) => t.id === board?.teamId)
+  const format      = board?.format || '11v11'
 
   // Derive current-phase arrays from the live subscription
-  const teleItems  = phaseData?.telestration  || []
-  const slots      = phaseData?.playerSlots   || []
-  const opponents  = phaseData?.opponentSlots || []
+  const teleItems   = phaseData?.telestration  || []
+  const slots       = phaseData?.playerSlots   || []
+  const opponents   = phaseData?.opponentSlots || []
 
   // Expose stage for export
   useImperativeHandle(ref, () => ({
@@ -504,8 +506,11 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
 
           <PlayerLayer
             fieldRect={fieldRect}
-            boardId={boardId}
-            phaseKey={phaseKey}
+            slots={slots}
+            opponents={opponents}
+            teamPlayers={teamPlayers}
+            team={team}
+            viewOptions={viewOptions}
             placingPlayerId={placingPlayerId}
             highlightedSlotId={highlightedSlotId}
             activeTool={activeTool}
