@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react'
-import { Stage, Layer, Rect, Circle, Shape } from 'react-konva'
+import { Layer, Rect, Circle, Shape } from 'react-konva'
+import KonvaStage from './KonvaStage'
 import { v4 as uuid } from 'uuid'
 import useStore from '../../store'
 import { getFieldRect, screenToField, isInField, clampNorm } from '../../utils/fieldGeometry'
@@ -469,7 +470,7 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
       onDrop={handleDrop}
     >
       {size.width > 0 && (
-        <Stage
+        <KonvaStage
           ref={stageRef}
           width={size.width}
           height={size.height}
@@ -607,7 +608,7 @@ const FieldCanvas = forwardRef(function FieldCanvas({ boardId, phaseKey, present
               )}
             </Layer>
           )}
-        </Stage>
+        </KonvaStage>
       )}
 
       {/* ── Placing-player banner ── */}
